@@ -1,0 +1,208 @@
+
+export default function Footer() {
+
+    return (
+        <footer className="container mx-auto flex justify-between items-center border-t py-8">
+            <div className="pt-12 lg:pt-16">
+                <div className="px-4 mx-auto max-w-7xl md:px-8">
+                    <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-7 gap-12 lg:gap-8 mb-16">
+                        <div className="col-span-full lg:col-span-2">
+                            <div className="lg:-mt-2 mb-4">
+                                <a
+                                    href="/"
+                                    className="inline-flex items-center text-black-800 text-xl md:text-2xl font-bold gap-2"
+                                >
+                                    <span className="">BrutTools</span>
+                                </a>
+                            </div>
+                            <p className="text-gray-500 sm:pr-8 mb-6">
+                                Discover BrutTools, where innovation meets simplicity. Our diverse range of online tools is here to streamline your work and unleash your creativity
+                            </p>
+
+                        </div>
+
+                        <div className="">
+                            <div className="text-gray-800 font-bold tracking-widest uppercase mb-4">
+                                AI Tools
+                            </div>
+                            <div className="flex flex-col gap-4">
+                                <div className="">
+                                    <a
+                                        href="/generate-background"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Tube Downloader
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div className="">
+                            <div className="text-gray-800 font-bold tracking-widest uppercase mb-4">
+                                Must Know
+                            </div>
+                            <nav className="flex flex-col gap-4">
+                                <div className="">
+                                    <a
+                                        href="/about"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        About Us
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/contact"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Contact Us
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/pricing"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Pricing
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/refund-policy"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Refund Policy
+                                    </a>
+                                </div>
+                            </nav>
+                        </div>
+                        <div className="">
+                            <div className="text-gray-800 font-bold tracking-widest uppercase mb-4">
+                                Account
+                            </div>
+                            <nav className="flex flex-col gap-4">
+                                <div className="">
+                                    <a
+                                        href="/login"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Login
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/register"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Register
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/forget-password"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Reset Password
+                                    </a>
+                                </div>
+                            </nav>
+                        </div>
+                        <div className="">
+                            <div className="text-gray-800 font-bold tracking-widest uppercase mb-4">
+                                Legal
+                            </div>
+                            <nav className="flex flex-col gap-4">
+                                <div className="">
+                                    <a
+                                        href="/terms"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Terms of Service
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/privacy"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Privacy Policy
+                                    </a>
+                                </div>
+                                <div className="">
+                                    <a
+                                        href="/cookies"
+                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                    >
+                                        Cookies Policy
+                                    </a>
+                                </div>
+
+
+                            </nav>
+                        </div>
+
+                        <div className="">
+                            <div className="text-gray-800 font-bold tracking-widest uppercase mb-4">
+                                Social Media
+                            </div>
+                            <div className="flex items-center">
+                                <a href="https://www.instagram.com/bruttools/" className="ml-2">
+                                    <svg className="w-10 h-10" fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M7.75 2C4.35 2 2 4.35 2 7.75V16.25C2 19.65 4.35 22 7.75 22H16.25C19.65 22 22 19.65 22 16.25V7.75C22 4.35 19.65 2 16.25 2H7.75ZM18.5 5.25C19.19 5.25 19.75 5.81 19.75 6.5C19.75 7.19 19.19 7.75 18.5 7.75C17.81 7.75 17.25 7.19 17.25 6.5C17.25 5.81 17.81 5.25 18.5 5.25ZM12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7ZM12 8.75C10.21 8.75 8.75 10.21 8.75 12C8.75 13.79 10.21 15.25 12 15.25C13.79 15.25 15.25 13.79 15.25 12C15.25 10.21 13.79 8.75 12 8.75Z"></path>
+                                        </g>
+                                    </svg>
+                                </a>
+
+                                <a href="https://www.facebook.com/profile.php?id=61565157492897" className="ml-2">
+                                    <svg className="w-10 h-10" fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M12 2.03998C6.5 2.03998 2 6.52998 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.84998C10.44 7.33998 11.93 5.95998 14.22 5.95998C15.31 5.95998 16.45 6.14998 16.45 6.14998V8.61998H15.19C13.95 8.61998 13.56 9.38998 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96C15.9164 21.5878 18.0622 20.3855 19.6099 18.57C21.1576 16.7546 22.0054 14.4456 22 12.06C22 6.52998 17.5 2.03998 12 2.03998Z"></path>
+                                        </g>
+                                    </svg>
+                                </a>
+
+                                <a href="https://www.youtube.com/channel/UCTgl_Sgc8shjmbSv9xk1_aA" className="ml-2">
+                                    <svg className="w-10 h-10" fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M10 15L15 12L10 9V15ZM21.842 7.3C21.6937 6.74975 21.4187 6.2445 21.04 5.82C20.632 5.3535 20.106 5.00775 19.507 4.81625C18.3 4.42025 12 4.42025 12 4.42025C12 4.42025 5.7 4.42025 4.493 4.81625C3.893 5.00775 3.367 5.3535 2.96 5.82C2.58125 6.2445 2.30625 6.74975 2.158 7.3C1.79625 8.54575 1.79625 12 1.79625 12C1.79625 12 1.79625 15.4542 2.158 16.7C2.30625 17.2503 2.58125 17.7555 2.96 18.18C3.367 18.6465 3.893 18.9922 4.493 19.1838C5.7 19.5798 12 19.5798 12 19.5798C12 19.5798 18.3 19.5798 19.507 19.1838C20.106 18.9922 20.632 18.6465 21.04 18.18C21.4187 17.7555 21.6937 17.2503 21.842 16.7C22.2037 15.4542 22.2037 12 22.2037 12C22.2037 12 22.2037 8.54575 21.842 7.3Z"></path>
+                                        </g>
+                                    </svg>
+
+                                </a>
+
+                                <a href="https://www.reddit.com/user/New-Boat-1314/" className="ml-2">
+                                    <svg className="w-10 h-10" fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M20.52 8.34C20.44 8.01 20.22 7.76 19.94 7.63C19.63 7.5 19.3 7.5 18.99 7.65C18.44 7.91 17.87 8.11 17.28 8.24C16.94 7.93 16.5 7.74 16 7.74C15.5 7.74 15.06 7.94 14.73 8.25C13.7 8.05 12.68 8.05 11.64 8.25C11.31 7.94 10.87 7.74 10.37 7.74C9.88 7.74 9.44 7.94 9.11 8.24C8.53 8.11 7.96 7.91 7.41 7.64C7.1 7.49 6.78 7.48 6.46 7.61C6.19 7.73 5.97 8 5.87 8.33C4.86 11.72 5.57 14.81 7.78 16.17C7.63 16.53 7.55 16.91 7.55 17.3C7.55 19.33 9.82 21 12.54 21C15.27 21 17.54 19.33 17.54 17.3C17.54 16.91 17.46 16.53 17.31 16.17C19.52 14.81 20.22 11.71 19.2 8.32L20.52 8.34ZM9.44 13.4C9.44 12.71 9.99 12.16 10.67 12.16C11.36 12.16 11.91 12.71 11.91 13.4C11.91 14.09 11.36 14.64 10.67 14.64C9.99 14.64 9.44 14.09 9.44 13.4ZM15.63 17.34C15.22 17.75 14.04 18.03 12.54 18.03C11.05 18.03 9.86 17.75 9.45 17.34C9.32 17.21 9.31 16.99 9.44 16.84C9.57 16.7 9.8 16.7 9.94 16.82C10.27 17.14 11.21 17.48 12.54 17.48C13.87 17.48 14.81 17.14 15.15 16.82C15.29 16.69 15.51 16.7 15.64 16.84C15.78 16.98 15.77 17.21 15.63 17.34ZM14.4 14.64C13.72 14.64 13.16 14.09 13.16 13.4C13.16 12.71 13.72 12.16 14.4 12.16C15.09 12.16 15.64 12.71 15.64 13.4C15.64 14.09 15.09 14.64 14.4 14.64Z"></path>
+                                        </g>
+                                    </svg>
+
+                                </a>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div className="text-gray-400 text-sm text-center border-t py-8">
+                        © 2024 All rights reserved by BrutTools.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </footer >
+
+    );
+
+}
