@@ -8,6 +8,7 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const db = require('./db');
 const crypto = require('crypto');
+const ytdl = require('ytdl-core');
 
 
 const fs = require('fs');
@@ -72,6 +73,7 @@ app.use(passport.session());
 
 
 
+
 require("./passportConfig")(passport);
 
 
@@ -117,6 +119,32 @@ db.query('SELECT * FROM settings', async (err, results) => {
         }
     }
 });
+
+
+// dowload video 
+
+app.get('/downloadVideo', async (req, res) => {
+    const videoUrl = req.query.url;
+    if (!ytdl.validateURL(videoUrl)) {
+        return res.status(400).send({ error: 'Invalid URL' });
+    }
+
+    try {
+        const videoInfo = await ytdl.getInfo(videoUrl);
+        let videoTitle = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
+        console.log(videoTitle);
+
+        res.header('Content-Disposition', `attachment; filename="${videoTitle}.mp4"`);
+        ytdl(videoUrl, { format: 'mp4' }).pipe(res);
+    } catch (error) {
+        res.status(500).send({ error: 'Error downloading video' });
+    }
+});
+
+
+//end dowload videos
+
+
 
 // db.query('SELECT * FROM settings', async (err, results) => {
 //     if (err) {
@@ -396,6 +424,7 @@ app.post('/register', (req, res) => {
         const coupon = req.body.coupon;
         const email = req.body.email;
         const recaptchaToken = req.body.recaptchaToken;
+
         const secretKey = process.env.RECAPTCHA_SECRET_KEY;
         const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
 
@@ -407,8 +436,7 @@ app.post('/register', (req, res) => {
                 const data = response.data;
                 const success = data.success;
                 if (success !== undefined && success === true) {
-                    // reCAPTCHA verification passed
-
+                    // reCAPTCHA verification passed 
                     const usernameQuery = 'SELECT * FROM user WHERE username = ?';
                     db.query(usernameQuery, [username], (usernameError, usernameResult) => {
                         if (usernameError) {
