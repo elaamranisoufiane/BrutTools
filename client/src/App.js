@@ -12,6 +12,11 @@ const Dashboard = lazy(() => import("./pages/dashborad/dashboard"));
 const TubeDownloader = lazy(() => import("./pages/dashborad/TubeDownloader"));
 //for guests 
 const TubeDownloaderGuest = lazy(() => import("./pages/dashboradGuest/TubeDownloader"));
+const ImageToPdf = lazy(() => import("./pages/dashboradGuest/files/imageToPdf"));
+const WordToPDFConverter = lazy(() => import("./pages/dashboradGuest/files/wordToPDF"));
+const PDFToWordConverter = lazy(() => import("./pages/dashboradGuest/files/pdfToWord"));
+const ImageCompressor = lazy(() => import("./pages/dashboradGuest/images/imageCompressor"));
+const PDFMerger = lazy(() => import("./pages/dashboradGuest/files/mergePDF"));
 //error 404
 const NotFoundPage = lazy(() => import("./pages/More/NotFoundPage"));
 
@@ -89,6 +94,11 @@ const App = () => {
           {!isAuthenticated ? (
             <>
               <Route path="/tubedownloader" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><TubeDownloaderGuest /></Suspense>} />
+              <Route path="/imagetopdf" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ImageToPdf /></Suspense>} />
+              <Route path="/wordtopdf" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><WordToPDFConverter /></Suspense>} />
+              <Route path="/pdftoword" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><PDFToWordConverter /></Suspense>} />
+              <Route path="/imagecompressor" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ImageCompressor /></Suspense>} />
+              <Route path="/mergepdf" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><PDFMerger /></Suspense>} />
               <Route path="/email-verified" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ValidationEmailSuccess /></Suspense>} />
               <Route path="/email-failed" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ValidationEmailFail /></Suspense>} />
               <Route path="/forget-password" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ForgetPassword /></Suspense>} />

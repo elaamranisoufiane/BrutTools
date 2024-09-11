@@ -180,6 +180,24 @@ export default function NavBar() {
             toolUrl: '/tubedownloader-pro'
 
         }
+        ,
+        {
+            toolName: 'Image to PDF',
+            toolUrl: '/imagetopdf'
+
+        }, {
+            toolName: 'Word to PDF',
+            toolUrl: '/wordtopdf'
+        }, {
+            toolName: 'PDF to Word',
+            toolUrl: '/pdftoword'
+        }, {
+            toolName: 'Image Compressor',
+            toolUrl: '/imagecompressor'
+        }, {
+            toolName: 'Merge PDF',
+            toolUrl: '/mergepdf'
+        }
     ];
 
 
@@ -187,7 +205,23 @@ export default function NavBar() {
         {
             toolName: 'Video Downloader',
             toolUrl: '/tubedownloader'
+        },
+        {
+            toolName: 'Image to PDF',
+            toolUrl: '/imagetopdf'
 
+        }, {
+            toolName: 'Word to PDF',
+            toolUrl: '/wordtopdf'
+        }, {
+            toolName: 'PDF to Word',
+            toolUrl: '/pdftoword'
+        }, {
+            toolName: 'Image Compressor',
+            toolUrl: '/imagecompressor'
+        }, {
+            toolName: 'Merge PDF',
+            toolUrl: '/mergepdf'
         }
     ];
 

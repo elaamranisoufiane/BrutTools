@@ -1,6 +1,32 @@
 
 export default function Footer() {
 
+    const Tools = [
+        {
+            toolName: 'Video Downloader',
+            toolUrl: '/tubedownloader'
+        },
+        {
+            toolName: 'Image to PDF',
+            toolUrl: '/imagetopdf'
+
+        }, {
+            toolName: 'Word to PDF',
+            toolUrl: '/wordtopdf'
+        }, {
+            toolName: 'PDF to Word',
+            toolUrl: '/pdftoword'
+        }, {
+            toolName: 'Image Compressor',
+            toolUrl: '/imagecompressor'
+        }, {
+            toolName: 'Merge PDF',
+            toolUrl: '/mergepdf'
+        }
+    ];
+
+
+
     return (
         <footer className="container mx-auto flex justify-between items-center border-t py-8">
             <div className="pt-12 lg:pt-16">
@@ -27,12 +53,20 @@ export default function Footer() {
                             </div>
                             <div className="flex flex-col gap-4">
                                 <div className="">
-                                    <a
-                                        href="/generate-background"
-                                        className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
-                                    >
-                                        Tube Downloader
-                                    </a>
+
+
+                                    {Tools.map((tool) => (
+                                        <>
+                                            <a key={tool.toolUrl}
+                                                href={tool.toolUrl}
+                                                className="text-gray-500 hover:text-indigo-500 active:text-indigo-600 transition duration-100"
+                                            >
+                                                {tool.toolName}
+                                            </a>
+                                            <br />
+                                        </>
+                                    ))}
+
                                 </div>
 
                             </div>

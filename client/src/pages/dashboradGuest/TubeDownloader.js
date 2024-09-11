@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DownloadButton from '../dashborad/DownloadButton';
 import { Helmet } from 'react-helmet';
+import { Download, X, Check } from 'lucide-react';
 
 
 const DOMAIN_NAME = window.location.origin;
@@ -12,6 +13,54 @@ let selectedfile = null;
 
 const TubeDownloader = () => {
 
+    const [videoUrl, setVideoUrl] = useState('');
+    const [error, setError] = useState('');
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    const handleDownload = async () => {
+        if (!videoUrl) {
+            setError('Please enter a valid video URL');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const response = await axios.get(`/api/downloadVideo`, {
+                params: { url: videoUrl },
+                responseType: 'blob',
+            });
+
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = 'video.mp4';
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+                if (fileNameMatch.length === 2) {
+                    fileName = fileNameMatch[1];
+                }
+            }
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+
+            setIsSuccess(true);
+            setVideoUrl('');
+            setTimeout(() => setIsSuccess(false), 3000);
+        } catch (err) {
+            console.error('Download failed:', err);
+            setError('Download failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // end 
     const [plans, setPlans] = useState([]);
     const [showlimitImageSize, setShowlimitImageSize] = useState(false);
 
@@ -282,6 +331,7 @@ const TubeDownloader = () => {
         return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
     };
 
+
     return (
 
         <>
@@ -293,7 +343,73 @@ const TubeDownloader = () => {
 
             <main className="max-w-3/4 h-full flex  flex-col items-center min-h-screen p-2">
                 <div className="container bg-white p-10 rounded-lg  mx-auto flex-col">
-                    <h2 className="text-2xl font-semibold"><center>Video Downloader</center></h2><br></br>
+
+
+                    <div className="max-w-2xl mx-auto mt-10 p-8 bg-gradient-to-br from-white-900 to-white-800 rounded-xl shadow-2xl text-white">
+                        <h2 className="text-3xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                            Video Downloader
+                        </h2>
+
+                        <div className="space-y-6">
+                            <div className="relative w-full">
+                                <input
+                                    type="text"
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                    placeholder="Enter video URL"
+                                    className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                                />
+                                {videoUrl && (
+                                    <button
+                                        onClick={() => setVideoUrl('')}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition duration-300"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* {thumbnail && (
+                                    <div className="flex justify-center">
+                                        <img src={thumbnail} alt="Video thumbnail" className="max-w-full h-auto rounded-lg shadow-md" />
+                                    </div>
+                                )} */}
+
+                            <div className="flex justify-center">
+                                <button
+                                    onClick={handleDownload}
+                                    disabled={isLoading || isSuccess}
+                                    className={`px-6 py-3 rounded-lg font-semibold transition duration-300 ease-in-out flex items-center justify-center
+              ${isLoading ? 'bg-gray-600 cursor-not-allowed' :
+                                            isSuccess ? 'bg-green-500 cursor-not-allowed' :
+                                                'bg-blue-500 hover:bg-blue-600'}`}
+                                >
+                                    {isLoading ? (
+                                        <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                    ) : isSuccess ? (
+                                        <Check className="mr-2" size={20} />
+                                    ) : (
+                                        <Download className="mr-2" size={20} />
+                                    )}
+                                    {isLoading ? 'Processing...' : isSuccess ? 'Downloaded!' : 'Download'}
+                                </button>
+                            </div>
+
+                            {error && (
+                                <p className="text-red-400 text-sm mt-2 animate-fade-in text-center">{error}</p>
+                            )}
+                        </div>
+                    </div>
+
+
+
+
+
+
+
 
                     {false && (
                         <>

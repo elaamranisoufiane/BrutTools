@@ -6,6 +6,11 @@ const ProTools = [
         toolName: 'Video Downloader',
         toolUrl: '/tubedownloader-pro'
 
+    },
+    {
+        toolName: 'Image to PDF',
+        toolUrl: '/imagetopdf'
+
     }
 ];
 
