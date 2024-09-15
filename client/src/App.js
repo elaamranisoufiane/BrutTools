@@ -17,6 +17,21 @@ const WordToPDFConverter = lazy(() => import("./pages/dashboradGuest/files/wordT
 const PDFToWordConverter = lazy(() => import("./pages/dashboradGuest/files/pdfToWord"));
 const ImageCompressor = lazy(() => import("./pages/dashboradGuest/images/imageCompressor"));
 const PDFMerger = lazy(() => import("./pages/dashboradGuest/files/mergePDF"));
+//DevTools 
+
+const CurrencyConverter = lazy(() => import("./pages/dashboradGuest/DevTools/CurrencyConverter"));
+const JSONFormatter = lazy(() => import("./pages/dashboradGuest/DevTools/JSONFormatter"));
+const QRCodeGenerator = lazy(() => import("./pages/dashboradGuest/DevTools/QRCodeGenerator"));
+const UnitConverter = lazy(() => import("./pages/dashboradGuest/DevTools/UnitConverter"));
+const URLShortener = lazy(() => import("./pages/dashboradGuest/DevTools/URLShortener"));
+const PasswordGenerator = lazy(() => import("./pages/dashboradGuest/DevTools/PasswordGenerator"));
+const MarkdownPreview = lazy(() => import("./pages/dashboradGuest/DevTools/MarkdownPreview"));
+const ColorPicker = lazy(() => import("./pages/dashboradGuest/DevTools/ColorPicker"));
+// audio tools 
+const TextToSpeech = lazy(() => import("./pages/dashboradGuest/Audio/handleSpeak"));
+const SpeechToText = lazy(() => import("./pages/dashboradGuest/Audio/SpeechToText"));
+
+
 //error 404
 const NotFoundPage = lazy(() => import("./pages/More/NotFoundPage"));
 
@@ -99,6 +114,19 @@ const App = () => {
               <Route path="/pdftoword" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><PDFToWordConverter /></Suspense>} />
               <Route path="/imagecompressor" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ImageCompressor /></Suspense>} />
               <Route path="/mergepdf" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><PDFMerger /></Suspense>} />
+              <Route path="/currency-converter" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><CurrencyConverter /></Suspense>} />
+              <Route path="/json-formatter" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><JSONFormatter /></Suspense>} />
+              <Route path="/qr-code-generator" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><QRCodeGenerator /></Suspense>} />
+              <Route path="/unit-converter" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><UnitConverter /></Suspense>} />
+              <Route path="/color-picker" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ColorPicker /></Suspense>} />
+              <Route path="/markdown-preview" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><MarkdownPreview /></Suspense>} />
+              <Route path="/password-generator" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><PasswordGenerator /></Suspense>} />
+              <Route path="/url-shortener" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><URLShortener /></Suspense>} />
+
+              <Route path="/text-to-speech" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><TextToSpeech /></Suspense>} />
+              <Route path="/speech-to-text" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><SpeechToText /></Suspense>} />
+
+
               <Route path="/email-verified" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ValidationEmailSuccess /></Suspense>} />
               <Route path="/email-failed" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ValidationEmailFail /></Suspense>} />
               <Route path="/forget-password" element={<Suspense fallback={<div className="h-full min-h-screen"> </div>}><ForgetPassword /></Suspense>} />

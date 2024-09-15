@@ -8,7 +8,8 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const db = require('./db');
 const crypto = require('crypto');
-const ytdl = require('ytdl-core');
+
+
 
 
 const fs = require('fs');
@@ -121,28 +122,834 @@ db.query('SELECT * FROM settings', async (err, results) => {
 });
 
 
-// dowload video 
 
-app.get('/downloadVideo', async (req, res) => {
-    const videoUrl = req.query.url;
-    if (!ytdl.validateURL(videoUrl)) {
-        return res.status(400).send({ error: 'Invalid URL' });
+
+
+//image to PDF 
+util = require('util');
+const multer1 = require('multer');
+const upload1 = multer1({ dest: 'uploads/' });
+const PDFDocument = require('pdfkit');
+app.post('/api/convert', upload1.array('images'), (req, res) => {
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).send('No files were uploaded.');
     }
 
-    try {
-        const videoInfo = await ytdl.getInfo(videoUrl);
-        let videoTitle = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
-        console.log(videoTitle);
+    const doc = new PDFDocument();
+    const pdfPath = path.join(__dirname, 'converted.pdf');
+    const writeStream = fs.createWriteStream(pdfPath);
 
-        res.header('Content-Disposition', `attachment; filename="${videoTitle}.mp4"`);
-        ytdl(videoUrl, { format: 'mp4' }).pipe(res);
+    doc.pipe(writeStream);
+
+    req.files.forEach((file, index) => {
+        if (index > 0) {
+            doc.addPage();
+        }
+        doc.image(file.path, 0, 0, { fit: [doc.page.width, doc.page.height], align: 'center', valign: 'center' });
+    });
+
+    doc.end();
+
+    writeStream.on('finish', () => {
+        res.sendFile(pdfPath, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                return res.status(500).send('An error occurred while sending the file.');
+            }
+
+            // Clean up temporary files
+            try {
+                fs.unlinkSync(pdfPath);
+                req.files.forEach((file) => fs.unlinkSync(file.path));
+            } catch (cleanupErr) {
+                console.error('Error during cleanup:', cleanupErr);
+            }
+        });
+    });
+
+    writeStream.on('error', (err) => {
+        console.error('Error writing PDF:', err);
+        res.status(500).send('An error occurred while generating the PDF.');
+    });
+});
+
+//PDF to WORD
+//sudo apt-get install unoconv
+const { exec } = require('child_process');
+const execAsync = util.promisify(exec);
+
+app.post('/api/pdf-to-word', upload1.single('document'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file was uploaded.');
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(__dirname, `${req.file.filename}.docx`);
+
+    try {
+        await execAsync(`unoconv -f docx -o "${outputPath}" "${inputPath}"`);
+
+        res.sendFile(outputPath, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                return res.status(500).send('An error occurred while sending the file.');
+            }
+
+            fs.unlinkSync(inputPath);
+            fs.unlinkSync(outputPath);
+        });
     } catch (error) {
-        res.status(500).send({ error: 'Error downloading video' });
+        console.error('Conversion error:', error);
+        res.status(500).send('An error occurred during conversion.');
+
+        fs.unlinkSync(inputPath);
     }
 });
 
 
+//word to pdf 
+//sudo apt-get install libreoffice
+//npm install libreoffice-convert
+const { promisify } = require('util');
+const libre = require('libreoffice-convert');
+const convertAsync = promisify(libre.convert);
+
+app.post('/api/word-to-pdf', upload1.single('document'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file was uploaded.');
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(__dirname, `${req.file.filename}.pdf`);
+
+    try {
+        const ext = '.pdf'
+        const file = await fs.promises.readFile(inputPath);
+
+        let pdfBuf = await convertAsync(file, ext, undefined);
+
+        await fs.promises.writeFile(outputPath, pdfBuf);
+
+        res.sendFile(outputPath, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                return res.status(500).send('An error occurred while sending the file.');
+            }
+
+            // Clean up temporary files
+            fs.unlinkSync(inputPath);
+            fs.unlinkSync(outputPath);
+        });
+    } catch (error) {
+        console.error('Conversion error:', error);
+        res.status(500).send('An error occurred during conversion.');
+
+        // Clean up input file on error
+        fs.unlinkSync(inputPath);
+    }
+});
+
+//Image Compressor
+//npm install sharp
+const sharp = require('sharp');
+app.post('/api/compress-image', upload1.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file was uploaded.');
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(__dirname, `compressed_${req.file.filename}.jpg`);
+    const quality = parseInt(req.body.quality) || 80;
+
+    try {
+        await sharp(inputPath)
+            .jpeg({ quality: quality })
+            .toFile(outputPath);
+
+        res.sendFile(outputPath, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                return res.status(500).send('An error occurred while sending the file.');
+            }
+
+            // Clean up temporary files
+            fs.unlinkSync(inputPath);
+            fs.unlinkSync(outputPath);
+        });
+    } catch (error) {
+        console.error('Compression error:', error);
+        res.status(500).send('An error occurred during compression.');
+
+        // Clean up input file on error
+        fs.unlinkSync(inputPath);
+    }
+});
+
+
+//PDF Merger using
+//npm install pdf-lib
+
+app.post('/api/merge-pdf', upload1.array('pdfs', 10), async (req, res) => {
+    try {
+        const mergedPdf = await PDFDocument.create();
+
+        for (const file of req.files) {
+            const pdfBytes = fs.readFileSync(file.path);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+
+            copiedPages.forEach(page => mergedPdf.addPage(page));
+        }
+
+        const mergedPdfBytes = await mergedPdf.save();
+        const outputPath = path.join(__dirname, 'merged.pdf');
+
+        fs.writeFileSync(outputPath, mergedPdfBytes);
+
+        res.download(outputPath, 'merged.pdf', () => {
+            fs.unlinkSync(outputPath);
+
+            req.files.forEach(file => fs.unlinkSync(file.path));
+        });
+    } catch (error) {
+        console.error('Error merging PDFs:', error);
+        res.status(500).send('Error merging PDFs');
+    }
+});
+
+
+
+// dowload video  
+const ytdl = require('ytdl-core');
+
+
+app.get('/api/downloadVideo', async (req, res) => {
+
+
+    const url = req.query.url;
+
+    if (!url) {
+        return res.status(400).send('URL is required');
+    }
+
+    try {
+        // Get video info from ytdl-core
+        const videoInfo = await ytdl.getInfo(url);
+        const format = ytdl.chooseFormat(videoInfo.formats, { quality: 'highest' });
+
+        if (!format) {
+            return res.status(404).send('No suitable format found');
+        }
+
+        // Prepare the filename
+        const title = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
+        res.header('Content-Disposition', `attachment; filename="${title}.mp4"`);
+        res.header('Content-Type', 'video/mp4');
+
+
+        // Stream the video to the client
+        ytdl(url, { format: format })
+            .pipe(res)
+            .on('finish', () => {
+                console.log('Download completed');
+            })
+            .on('error', (err) => {
+                console.error('Error during download:', err);
+                res.status(500).send('An error occurred while downloading the video');
+            });
+
+    } catch (error) {
+        console.error('Error downloading video:', error);
+        res.status(500).send('An error occurred while downloading the video');
+    }
+
+
+    // ____
+    // try {
+    //     const { url } = req.query;
+
+    //     if (!url) {
+    //         return res.status(400).send('URL is required');
+    //     }
+
+    //     console.log('Fetching video info...');
+    //     const videoInfo = await ytdl.getInfo(url);
+    //     console.log('Video info fetched successfully');
+
+    //     const format = ytdl.chooseFormat(videoInfo.formats, { quality: 'highest' });
+
+    //     if (!format) {
+    //         return res.status(404).send('No suitable format found');
+    //     }
+
+    //     const title = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
+    //     res.header('Content-Disposition', `attachment; filename="${title}.mp4"`);
+    //     res.header('Content-Type', 'video/mp4');
+
+    //     console.log('Streaming video...');
+    //     ytdl(url, { format: format })
+    //         .pipe(res)
+    //         .on('finish', () => {
+    //             console.log('Download completed');
+    //         })
+    //         .on('error', (err) => {
+    //             console.error('Error during download:', err);
+    //             res.status(500).send('An error occurred while downloading the video');
+    //         });
+
+    // } catch (error) {
+    //     console.error('Error downloading video:', error);
+    //     res.status(500).send('An error occurred while downloading the video');
+    // }
+});
+
 //end dowload videos
+
+// npm install gtts @google-cloud/speech 
+//npm i stream
+
+// Text to Speech
+const gtts = require('gtts');
+app.post('/api/text-to-speech', (req, res) => {
+    const { text, voice } = req.body;
+    const tts = new gtts(text, voice || 'en'); // Default to 'en' if no voice specified
+
+    res.set({ 'Content-Type': 'audio/mpeg' });
+    tts.stream().pipe(res);
+});
+
+app.get('/api/voices', (req, res) => {
+    // Example voice list, replace with actual voices available from your TTS library
+    const voices = [
+        { code: 'en', name: 'English' },
+        { code: 'es', name: 'Spanish' },
+        { code: 'fr', name: 'French' },
+        { code: 'de', name: 'German' },
+        { code: 'it', name: 'Italian' },
+        { code: 'pt', name: 'Portuguese' },
+        { code: 'nl', name: 'Dutch' },
+        { code: 'ru', name: 'Russian' },
+        { code: 'ja', name: 'Japanese' },
+        { code: 'ko', name: 'Korean' },
+        { code: 'zh', name: 'Chinese' },
+        { code: 'ar', name: 'Arabic' },
+        { code: 'tr', name: 'Turkish' },
+        { code: 'pl', name: 'Polish' },
+        { code: 'sv', name: 'Swedish' },
+        { code: 'da', name: 'Danish' },
+        { code: 'no', name: 'Norwegian' },
+        { code: 'fi', name: 'Finnish' },
+        { code: 'cs', name: 'Czech' },
+        { code: 'hu', name: 'Hungarian' },
+        { code: 'sk', name: 'Slovak' },
+        { code: 'ro', name: 'Romanian' },
+        { code: 'sr', name: 'Serbian' },
+    ];
+
+
+    res.json({ voices });
+});
+
+// Speech to Text 
+/*
+befour starting 
+install this : pip install deepspeech
+create a python  file transcribe.py
+
+and past this code :
+
+import sys
+import deepspeech
+import numpy as np
+import wave
+
+def transcribe_audio(model_path, scorer_path, audio_path):
+    model = deepspeech.Model(model_path)
+    model.enableExternalScorer(scorer_path)
+
+    with wave.open(audio_path, 'rb') as wf:
+        if wf.getsampwidth() != 2:
+            raise ValueError("Only 16-bit audio files are supported")
+        if wf.getframerate() != 16000:
+            raise ValueError("Only 16kHz audio files are supported")
+
+        frames = wf.readframes(wf.getnframes())
+        audio = np.frombuffer(frames, dtype=np.int16)
+
+    text = model.stt(audio)
+    return text
+
+if __name__ == "__main__":
+    model_path = sys.argv[1]
+    scorer_path = sys.argv[2]
+    audio_path = sys.argv[3]
+
+    transcription = transcribe_audio(model_path, scorer_path, audio_path)
+    print(transcription)
+
+
+
+
+
+*/
+
+
+const upload2 = multer({ storage: multer.memoryStorage() });
+app.post('/api/speech-to-text', upload2.single('audio'), (req, res) => {
+    if (!req.file) {
+        console.error('No audio file uploaded.');
+        return res.status(400).send('No audio file uploaded.');
+    }
+
+    const tempFilePath = path.join(__dirname, 'temp.wav');
+    fs.writeFileSync(tempFilePath, req.file.buffer);
+
+    const modelPath = 'path/to/deepspeech-model.pbmm';
+    const scorerPath = 'path/to/deepspeech-scorer.scorer';
+
+    // Call the Python script
+    execFile('python', ['transcribe.py', modelPath, scorerPath, tempFilePath], (error, stdout, stderr) => {
+        fs.unlinkSync(tempFilePath); // Clean up the temp file
+
+        if (error) {
+            console.error('Error processing audio:', error);
+            return res.status(500).send('Error processing audio');
+        }
+        if (stderr) {
+            console.error('stderr:', stderr);
+            return res.status(500).send('Error processing audio');
+        }
+
+        const transcription = stdout.trim();
+        res.json({ text: transcription });
+    });
+});
+
+//npm install shortid
+// to upgrade ... 
+const shortid = require('shortid');
+app.post('/api/shorten-url', (req, res) => {
+    const { longUrl } = req.body;
+
+    if (!longUrl) {
+        return res.status(400).json({ error: 'Long URL is required' });
+    }
+
+    const shortId = shortid.generate();
+    const shortUrl = `${req.protocol}://${req.get('host')}/${shortId}`;
+
+    let normalizedUrl;
+    try {
+        const url = new URL(longUrl);
+        normalizedUrl = url.href;
+    } catch (error) {
+        normalizedUrl = longUrl.startsWith('//') ? `https:${longUrl}` : `https://${longUrl}`;
+    }
+
+    const query = 'INSERT INTO urls (id, long_url) VALUES (?, ?)';
+    db.query(query, [shortId, normalizedUrl], (err, result) => {
+        if (err) {
+            console.error('Error inserting URL:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        res.json({ shortUrl });
+    });
+});
+
+app.get('/:shortId', (req, res) => {
+    const { shortId } = req.params;
+
+    const selectQuery = 'SELECT long_url FROM urls WHERE id = ?';
+    const deleteQuery = 'DELETE FROM urls WHERE id = ?';
+
+    db.query(selectQuery, [shortId], (err, results) => {
+        if (err) {
+            console.error('Error querying URL:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('URL not found');
+        }
+
+        const longUrl = results[0].long_url;
+
+        db.query(deleteQuery, [shortId], (deleteErr) => {
+            if (deleteErr) {
+                console.error('Error deleting URL:', deleteErr);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            res.redirect(longUrl);
+        });
+    });
+});
+
+
+//still some problems here 
+app.post('/api/convert-unit', (req, res) => {
+    const { fromUnit, toUnit, value } = req.body;
+
+    if (!fromUnit || !toUnit || isNaN(value)) {
+        return res.status(400).json({ error: 'Invalid input' });
+    }
+
+    const fromUnitLower = fromUnit.toLowerCase();
+    const toUnitLower = toUnit.toLowerCase();
+
+    const conversionRates = {
+        // Distance Conversions
+        'km_to_m': 1000,
+        'km_to_cm': 100000,
+        'km_to_mm': 1000000,
+        'km_to_miles': 0.621371,
+        'km_to_yd': 1093.61,
+        'km_to_ft': 3280.84,
+        'km_to_in': 39370.1,
+
+        'm_to_km': 0.001,
+        'm_to_cm': 100,
+        'm_to_mm': 1000,
+        'm_to_miles': 0.000621371,
+        'm_to_yd': 1.09361,
+        'm_to_ft': 3.28084,
+        'm_to_in': 39.3701,
+
+        'cm_to_km': 0.00001,
+        'cm_to_m': 0.01,
+        'cm_to_mm': 10,
+        'cm_to_miles': 0.00000621371,
+        'cm_to_yd': 0.0109361,
+        'cm_to_ft': 0.0328084,
+        'cm_to_in': 0.393701,
+
+        'mm_to_km': 0.000001,
+        'mm_to_m': 0.001,
+        'mm_to_cm': 0.1,
+        'mm_to_miles': 0.000000621371,
+        'mm_to_yd': 0.00109361,
+        'mm_to_ft': 0.00328084,
+        'mm_to_in': 0.0393701,
+
+        'miles_to_km': 1.60934,
+        'miles_to_m': 1609.34,
+        'miles_to_cm': 160934,
+        'miles_to_mm': 1609344,
+        'miles_to_yd': 1760,
+        'miles_to_ft': 5280,
+        'miles_to_in': 63360,
+
+        'yd_to_km': 0.0009144,
+        'yd_to_m': 0.9144,
+        'yd_to_cm': 91.44,
+        'yd_to_mm': 914.4,
+        'yd_to_miles': 0.000568182,
+        'yd_to_ft': 3,
+        'yd_to_in': 36,
+
+        'ft_to_km': 0.0003048,
+        'ft_to_m': 0.3048,
+        'ft_to_cm': 30.48,
+        'ft_to_mm': 304.8,
+        'ft_to_miles': 0.000189394,
+        'ft_to_yd': 0.333333,
+        'ft_to_in': 12,
+
+        'in_to_km': 0.0000254,
+        'in_to_m': 0.0254,
+        'in_to_cm': 2.54,
+        'in_to_mm': 25.4,
+        'in_to_miles': 0.0000157828,
+        'in_to_yd': 0.0277778,
+        'in_to_ft': 0.0833333,
+
+        // Weight Conversions
+        'kg_to_g': 1000,
+        'kg_to_mg': 1000000,
+        'kg_to_lbs': 2.20462,
+        'kg_to_oz': 35.274,
+
+        'g_to_kg': 0.001,
+        'g_to_mg': 1000,
+        'g_to_lbs': 0.00220462,
+        'g_to_oz': 0.035274,
+
+        'mg_to_g': 0.001,
+        'mg_to_kg': 0.000001,
+        'mg_to_lbs': 0.00000220462,
+        'mg_to_oz': 0.000035274,
+
+        'lbs_to_kg': 0.453592,
+        'lbs_to_g': 453.592,
+        'lbs_to_mg': 453592.37,
+        'lbs_to_oz': 16,
+
+        'oz_to_kg': 0.0283495,
+        'oz_to_g': 28.3495,
+        'oz_to_mg': 28349.5,
+        'oz_to_lbs': 0.0625,
+
+        // Temperature Conversions
+        'celsius_to_fahrenheit': (c) => (c * 9 / 5) + 32,
+        'fahrenheit_to_celsius': (f) => (f - 32) * 5 / 9,
+        'celsius_to_kelvin': (c) => c + 273.15,
+        'kelvin_to_celsius': (k) => k - 273.15,
+        'fahrenheit_to_kelvin': (f) => (f - 32) * 5 / 9 + 273.15,
+        'kelvin_to_fahrenheit': (k) => (k - 273.15) * 9 / 5 + 32,
+
+        // Volume Conversions
+        'l_to_ml': 1000,
+        'l_to_m3': 0.001,
+        'l_to_cm3': 1000,
+        'l_to_gal': 0.264172,
+        'l_to_pt': 2.11338,
+        'l_to_qt': 1.05669,
+        'l_to_cup': 4.22675,
+        'l_to_fl_oz': 33.814,
+
+        'ml_to_l': 0.001,
+        'ml_to_m3': 1e-6,
+        'ml_to_cm3': 1,
+        'ml_to_gal': 0.000264172,
+        'ml_to_pt': 0.00211338,
+        'ml_to_qt': 0.00105669,
+        'ml_to_cup': 0.00422675,
+        'ml_to_fl_oz': 0.033814,
+
+        'm3_to_l': 1000,
+        'm3_to_ml': 1000000,
+        'm3_to_cm3': 1000000,
+        'm3_to_gal': 264.172,
+        'm3_to_pt': 2113.38,
+        'm3_to_qt': 1056.69,
+        'm3_to_cup': 4226.75,
+        'm3_to_fl_oz': 33814,
+
+        'cm3_to_l': 0.001,
+        'cm3_to_ml': 1,
+        'cm3_to_m3': 1e-6,
+        'cm3_to_gal': 0.000264172,
+        'cm3_to_pt': 0.00211338,
+        'cm3_to_qt': 0.00105669,
+        'cm3_to_cup': 0.00422675,
+        'cm3_to_fl_oz': 0.033814,
+
+        'gal_to_l': 3.78541,
+        'gal_to_ml': 3785.41,
+        'gal_to_m3': 0.00378541,
+        'gal_to_cm3': 3785.41,
+        'gal_to_pt': 8,
+        'gal_to_qt': 4,
+        'gal_to_cup': 16,
+        'gal_to_fl_oz': 128,
+
+        'pt_to_l': 0.473176,
+        'pt_to_ml': 473.176,
+        'pt_to_m3': 0.000473176,
+        'pt_to_cm3': 473.176,
+        'pt_to_gal': 0.125,
+        'pt_to_qt': 0.5,
+        'pt_to_cup': 2,
+        'pt_to_fl_oz': 16,
+
+        'qt_to_l': 0.946353,
+        'qt_to_ml': 946.353,
+        'qt_to_m3': 0.000946353,
+        'qt_to_cm3': 946.353,
+        'qt_to_gal': 0.25,
+        'qt_to_pt': 2,
+        'qt_to_cup': 4,
+        'qt_to_fl_oz': 32,
+
+        'cup_to_l': 0.236588,
+        'cup_to_ml': 236.588,
+        'cup_to_m3': 0.000236588,
+        'cup_to_cm3': 236.588,
+        'cup_to_gal': 0.0625,
+        'cup_to_pt': 0.5,
+        'cup_to_qt': 0.25,
+        'cup_to_fl_oz': 8,
+
+        'fl_oz_to_l': 0.0295735,
+        'fl_oz_to_ml': 29.5735,
+        'fl_oz_to_m3': 2.95735e-5,
+        'fl_oz_to_cm3': 29.5735,
+        'fl_oz_to_gal': 0.0078125,
+        'fl_oz_to_pt': 0.0625,
+        'fl_oz_to_qt': 0.03125,
+        'fl_oz_to_cup': 0.125,
+
+        // Area Conversions
+        'm2_to_cm2': 10000,
+        'm2_to_mm2': 1000000,
+        'm2_to_km2': 0.000001,
+        'm2_to_ac': 0.000247105,
+        'm2_to_ha': 0.0001,
+
+        'cm2_to_m2': 0.0001,
+        'cm2_to_mm2': 100,
+        'cm2_to_km2': 1e-10,
+        'cm2_to_ac': 2.471e-8,
+        'cm2_to_ha': 1e-6,
+
+        'mm2_to_m2': 1e-6,
+        'mm2_to_cm2': 0.01,
+        'mm2_to_km2': 1e-12,
+        'mm2_to_ac': 2.471e-10,
+        'mm2_to_ha': 1e-8,
+
+        'km2_to_m2': 1000000,
+        'km2_to_cm2': 1e+10,
+        'km2_to_mm2': 1e+12,
+        'km2_to_ac': 247.105,
+        'km2_to_ha': 100,
+
+        'ac_to_m2': 4046.86,
+        'ac_to_cm2': 40468600,
+        'ac_to_mm2': 4.04686e+7,
+        'ac_to_km2': 0.00404686,
+        'ac_to_ha': 0.404686,
+
+        'ha_to_m2': 10000,
+        'ha_to_cm2': 1e+8,
+        'ha_to_mm2': 1e+10,
+        'ha_to_km2': 0.01,
+        'ha_to_ac': 2.47105,
+
+        // Speed Conversions
+        'km/h_to_m/s': 0.277778,
+        'km/h_to_mph': 0.621371,
+        'km/h_to_ft/s': 0.911344,
+
+        'm/s_to_km/h': 3.6,
+        'm/s_to_mph': 2.23694,
+        'm/s_to_ft/s': 3.28084,
+
+        'mph_to_km/h': 1.60934,
+        'mph_to_m/s': 0.44704,
+        'mph_to_ft/s': 1.46667,
+
+        'ft/s_to_km/h': 1.09728,
+        'ft/s_to_m/s': 0.3048,
+        'ft/s_to_mph': 0.681818,
+
+        // Energy Conversions
+        'j_to_kj': 0.001,
+        'j_to_cal': 0.239006,
+        'j_to_kcal': 0.000239006,
+        'j_to_btu': 0.000947817,
+
+        'kj_to_j': 1000,
+        'kj_to_cal': 239.006,
+        'kj_to_kcal': 0.239006,
+        'kj_to_btu': 0.947817,
+
+        'cal_to_j': 4.184,
+        'cal_to_kj': 0.004184,
+        'cal_to_kcal': 0.001,
+        'cal_to_btu': 0.00396832,
+
+        'kcal_to_j': 4184,
+        'kcal_to_kj': 4.184,
+        'kcal_to_cal': 1000,
+        'kcal_to_btu': 3.96832,
+
+        'btu_to_j': 1055.06,
+        'btu_to_kj': 1.05506,
+        'btu_to_cal': 252.164,
+        'btu_to_kcal': 0.252164,
+
+        // Power Conversions
+        'w_to_kw': 0.001,
+        'w_to_hp': 0.00134102,
+
+        'kw_to_w': 1000,
+        'kw_to_hp': 1.34102,
+
+        'hp_to_w': 745.7,
+        'hp_to_kw': 0.7457,
+
+        // Pressure Conversions
+        'pa_to_kpa': 0.001,
+        'pa_to_bar': 0.00001,
+        'pa_to_atm': 0.00000986923,
+        'pa_to_psi': 0.000145038,
+
+        'kpa_to_pa': 1000,
+        'kpa_to_bar': 0.01,
+        'kpa_to_atm': 0.00986923,
+        'kpa_to_psi': 0.145038,
+
+        'bar_to_pa': 100000,
+        'bar_to_kpa': 100,
+        'bar_to_atm': 0.986923,
+        'bar_to_psi': 14.5038,
+
+        'atm_to_pa': 101325,
+        'atm_to_kpa': 101.325,
+        'atm_to_bar': 1.01325,
+        'atm_to_psi': 14.696,
+
+        'psi_to_pa': 6894.76,
+        'psi_to_kpa': 6.89476,
+        'psi_to_bar': 0.0689476,
+        'psi_to_atm': 0.068046,
+
+        'torr_to_pa': 133.322,
+        'torr_to_bar': 0.00133322,
+        'torr_to_psi': 0.0193368,
+        'torr_to_atm': 0.00131579,
+    };
+
+    const conversionKey = `${fromUnitLower}_to_${toUnitLower}`;
+    const conversionFunc = conversionRates[conversionKey];
+
+    if (typeof conversionFunc === 'function') {
+        // Handle temperature conversions
+        const result = conversionFunc(value);
+        return res.json({ result });
+    } else if (conversionFunc) {
+        // Handle other conversions
+        const result = value * conversionFunc;
+        return res.json({ result });
+    } else {
+        return res.status(400).json({ error: 'Conversion not supported' });
+    }
+});
+
+
+
+// Currency Converter
+app.post('/api/convert-currency', async (req, res) => {
+    const { fromCurrency, toCurrency, amount } = req.body;
+    const api = process.env.CONVERT_CURRENCY;
+
+    if (!fromCurrency || !toCurrency || isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid input' });
+    }
+
+    try {
+        const response = await axios.get(`https://v6.exchangerate-api.com/v6/${api}/latest/${fromCurrency}`);
+        const rates = response.data.conversion_rates;
+
+
+
+        if (rates && rates[toCurrency]) {
+            const rate = rates[toCurrency];
+            const result = amount * rate;
+            res.json({ result: result.toFixed(2) });
+        } else {
+            res.status(400).json({ error: 'Invalid currency' });
+        }
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        res.status(500).json({ error: 'Failed to fetch exchange rates' });
+    }
+});
+
+
+
 
 
 
@@ -482,7 +1289,7 @@ app.post('/register', (req, res) => {
                                             const mailOptions = {
                                                 from: process.env.SMTPEMAIL,
                                                 to: email,
-                                                subject: 'RePixer Email Verification',
+                                                subject: 'BrutTools Email Verification',
                                                 html: `
                                                 <!DOCTYPE html>
                                                 <html lang="en">
@@ -578,7 +1385,7 @@ app.post('/send-verification-link', async (req, res) => {
             const mailOptions = {
                 from: process.env.SMTPEMAIL,
                 to: email,
-                subject: 'RePixer Email Verification',
+                subject: 'BrutTools Email Verification',
                 html: `
              <!DOCTYPE html>
              <html lang="en">
@@ -707,7 +1514,7 @@ app.post('/forgot-password', (req, res) => {
                 const mailOptions = {
                     from: process.env.SMTPEMAIL,
                     to: email,
-                    subject: 'RePixer password Reset',
+                    subject: 'BrutTools password Reset',
                     html: `
                     <!DOCTYPE html>
                     <html lang="en">
@@ -2377,7 +3184,7 @@ app.post('/adduser', (req, res) => {
                                 const mailOptions = {
                                     from: process.env.SMTPEMAIL,
                                     to: email,
-                                    subject: 'RePixer Email Verification',
+                                    subject: 'BrutTools Email Verification',
                                     html: `
                                     <!DOCTYPE html>
                                     <html lang="en">
@@ -2772,6 +3579,7 @@ function unlinkImagesNotInDatabase() {
 
 const cron = require('node-cron');
 const { log } = require('console');
+
 
 
 cron.schedule('*/5 * * * *', () => {

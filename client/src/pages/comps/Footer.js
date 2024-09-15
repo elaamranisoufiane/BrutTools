@@ -22,6 +22,18 @@ export default function Footer() {
         }, {
             toolName: 'Merge PDF',
             toolUrl: '/mergepdf'
+        }, {
+            toolName: 'Currency Converter',
+            toolUrl: '/currency-converter'
+        }, {
+            toolName: 'JSON Formatter',
+            toolUrl: '/json-formatter'
+        }, {
+            toolName: 'QR Code Generator',
+            toolUrl: '/qr-code-generator'
+        }, {
+            toolName: 'Unit Converter',
+            toolUrl: '/unit-converter'
         }
     ];
 

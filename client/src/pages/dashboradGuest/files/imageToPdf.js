@@ -34,6 +34,8 @@ const JPGtoPDFConverter = () => {
     };
 
     const handleFileChange = (e) => {
+        setError('');
+        setSuccess('');
         const selectedFiles = Array.from(e.target.files).filter(
             file => file.type === 'image/jpeg'
         );
@@ -87,11 +89,10 @@ const JPGtoPDFConverter = () => {
             <main className="max-w-3/4 h-full flex flex-col items-center min-h-screen p-2">
                 <div className="container bg-white p-2 md:p-10 rounded-lg mx-auto flex-col">
                     <div className="max-w-2xl mx-auto mt-10 p-8 bg-gradient-to-br from-white-900 to-white-800 rounded-xl shadow-2xl">
-                        <h1 className="text-4xl font-bold text-center mb-4 text-gray-800">JPG en PDF</h1>
+                        <h1 className="text-4xl font-bold text-center mb-4 text-gray-800">Images to PDF</h1>
                         <p className="text-center text-gray-600 mb-8">
-                            Convertissez vos images en PDF. Ajustez l'orientation et les marges.
+                            Convert your images to PDF. Adjust orientation and margins.
                         </p>
-
 
                         {files && files.length > 0 ? (
                             <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
@@ -106,7 +107,6 @@ const JPGtoPDFConverter = () => {
                                 </button>
                             </div>
                         ) : (
-
                             <div
                                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
                                 onDragEnter={handleDragEnter}
@@ -127,19 +127,26 @@ const JPGtoPDFConverter = () => {
                                     className="bg-gray-600 hover:bg-gray-300 text-white font-bold py-3 px-6 rounded-lg cursor-pointer w-auto inline-flex items-center"
                                 >
                                     <FileUp className="mr-2" size={20} />
-                                    Sélectionner les images JPG
+                                    Select Images
                                 </label>
 
-                                <p className="mt-2 text-gray-500">ou déposer des images JPG ici</p>
+                                <p className="mt-2 text-gray-500">or drag and drop images here</p>
                             </div>
-
-
                         )}
-
-
-
-
                     </div>
+
+
+
+                    <div className="mt-10 max-w-2xl mx-auto text-center">
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Convert Images to PDF Easily!</h3>
+                        <p className="text-gray-600 mb-4">
+                            Our free image-to-PDF converter allows you to turn your images into PDF files with just one click. Upload your image, and our tool will handle the rest. Perfect for creating documents, reports, and more.
+                        </p>
+                        <p className="text-gray-600">
+                            If you need any assistance or have questions, please <a href="mailto:javatp01@gmail.com" className="text-blue-500 hover:underline">contact us</a>. We're always here to help!
+                        </p>
+                    </div>
+
                 </div>
 
                 <style>{`

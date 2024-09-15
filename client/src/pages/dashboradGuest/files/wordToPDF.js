@@ -65,14 +65,13 @@ const WordToPDFConverter = () => {
 
             <main className="max-w-3/4 h-full flex flex-col items-center min-h-screen p-2">
                 <div className="container bg-white p-2 md:p-10 rounded-lg mx-auto flex-col">
-                    <div className="max-w-2xl mx-auto mt-10 p-8 bg-gradient-to-br from-gray-100 to-white rounded-xl shadow-2xl">
+                    <div className="max-w-2xl mx-auto mt-10 p-8 bg-gradient-to-br from-white-900 to-white-800 rounded-xl shadow-2xl">
                         <h1 className="text-4xl font-bold text-center mb-4 text-gray-800">Word to PDF Converter</h1>
                         <p className="text-center text-gray-600 mb-8">
                             Convert your Word documents to PDF easily. Supports .docx files.
                         </p>
 
                         <div className="flex flex-col items-center justify-center space-y-4">
-
                             {!file ? (
                                 <>
                                     <input
@@ -108,15 +107,22 @@ const WordToPDFConverter = () => {
                                     </button>
                                 </>
                             )}
-
-
-
-
                         </div>
 
                         {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
                         {success && <p className="text-green-500 mt-4 text-center">{success}</p>}
                     </div>
+
+                    <div className="mt-10 max-w-2xl mx-auto text-center">
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Easily Convert Word Documents to PDF!</h3>
+                        <p className="text-gray-600 mb-4">
+                            Our free Word to PDF converter allows you to quickly transform your Word documents into PDF files. Just upload your .docx file and let our tool handle the conversion. Ideal for creating shareable documents, reports, and more.
+                        </p>
+                        <p className="text-gray-600">
+                            If you need any assistance or have questions, please <a href="mailto:javatp01@gmail.com" className="text-blue-500 hover:underline">contact us</a>. We're always here to help!
+                        </p>
+                    </div>
+
                 </div>
             </main>
         </>

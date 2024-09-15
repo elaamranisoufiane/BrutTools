@@ -128,9 +128,19 @@ const PDFMerger = () => {
                                     Select PDF files
                                 </label>
 
-                                <p className="mt-2 text-gray-500">or drop PDFs here</p>
+                                <p className="mt-2 text-gray-500">or drag and drop PDFs here</p>
                             </div>
                         )}
+                    </div>
+
+                    <div className="mt-10 max-w-2xl mx-auto text-center">
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Easily Merge Your PDFs!</h3>
+                        <p className="text-gray-600 mb-4">
+                            Our free PDF merger tool allows you to combine multiple PDF files into a single document effortlessly. Simply upload your PDFs, and our tool will take care of the rest. Perfect for organizing reports, contracts, and more.
+                        </p>
+                        <p className="text-gray-600">
+                            If you need any assistance or have questions, please <a href="mailto:javatp01@gmail.com" className="text-blue-500 hover:underline">contact us</a>. We're always here to help!
+                        </p>
                     </div>
                 </div>
 

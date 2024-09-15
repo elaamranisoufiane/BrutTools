@@ -338,7 +338,7 @@ const TubeDownloader = () => {
 
             <Helmet>
                 <title>Free Video Downloader - Download your from anywhere easy with one</title>
-                <meta name="description" content="Our free AI background generator allows you to create studio-quality product and portrait images quickly on any device." />
+                <meta name="description" content="Download your favorite videos from any site effortlessly with our free video downloader tool." />
             </Helmet>
 
             <main className="max-w-3/4 h-full flex  flex-col items-center min-h-screen p-2">
@@ -406,7 +406,15 @@ const TubeDownloader = () => {
 
 
 
-
+                    <div className="mt-10 max-w-2xl mx-auto text-center">
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Get Started Now!</h3>
+                        <p className="text-gray-600 mb-4">
+                            With our free video downloader, you can quickly and easily save your favorite videos from the web. Simply enter the URL of the video, hit the download button, and enjoy your content offline.
+                        </p>
+                        <p className="text-gray-600">
+                            If you encounter any issues or have questions, feel free to <a href="mailto:javatp01@gmail.com" className="text-blue-500 hover:underline">contact us</a>. We're here to help!
+                        </p>
+                    </div>
 
 
 

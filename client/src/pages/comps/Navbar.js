@@ -197,6 +197,36 @@ export default function NavBar() {
         }, {
             toolName: 'Merge PDF',
             toolUrl: '/mergepdf'
+        }, {
+            toolName: 'Currency Converter',
+            toolUrl: '/currency-converter'
+        }, {
+            toolName: 'JSON Formatter',
+            toolUrl: '/json-formatter'
+        }, {
+            toolName: 'QR Code Generator',
+            toolUrl: '/qr-code-generator'
+        }, {
+            toolName: 'Unit Converter',
+            toolUrl: '/unit-converter'
+        }, {
+            toolName: 'Text To Speech',
+            toolUrl: '/text-to-speech'
+        }, {
+            toolName: 'Speech To Text',
+            toolUrl: '/speech-to-text'
+        }, {
+            toolName: 'Url Shortener',
+            toolUrl: '/url-shortener'
+        }, {
+            toolName: 'Password Generator',
+            toolUrl: '/password-generator'
+        }, {
+            toolName: 'MarkDown Preview',
+            toolUrl: '/markdown-preview'
+        }, {
+            toolName: 'Color Picker',
+            toolUrl: '/color-picker'
         }
     ];
 
@@ -222,6 +252,36 @@ export default function NavBar() {
         }, {
             toolName: 'Merge PDF',
             toolUrl: '/mergepdf'
+        }, {
+            toolName: 'Currency Converter',
+            toolUrl: '/currency-converter'
+        }, {
+            toolName: 'JSON Formatter',
+            toolUrl: '/json-formatter'
+        }, {
+            toolName: 'QR Code Generator',
+            toolUrl: '/qr-code-generator'
+        }, {
+            toolName: 'Unit Converter',
+            toolUrl: '/unit-converter'
+        }, {
+            toolName: 'Text To Speech',
+            toolUrl: '/text-to-speech'
+        }, {
+            toolName: 'Speech To Text',
+            toolUrl: '/speech-to-text'
+        }, {
+            toolName: 'Url Shortener',
+            toolUrl: '/url-shortener'
+        }, {
+            toolName: 'Password Generator',
+            toolUrl: '/password-generator'
+        }, {
+            toolName: 'MarkDown Preview',
+            toolUrl: '/markdown-preview'
+        }, {
+            toolName: 'Color Picker',
+            toolUrl: '/color-picker'
         }
     ];
 
