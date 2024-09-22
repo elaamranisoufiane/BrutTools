@@ -45,7 +45,10 @@ app.use(cors({
     credentials: true
 }));
 
-
+app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    next();
+});
 
 
 //const timeout = require('connect-timeout');
@@ -70,8 +73,6 @@ app.use(bodyParser.urlencoded({
 app.use(expressSession({ secret: 'mySecretKey', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-
 
 
 
@@ -450,80 +451,6 @@ app.get('/api/voices', (req, res) => {
     res.json({ voices });
 });
 
-// Speech to Text 
-/*
-befour starting 
-install this : pip install deepspeech
-create a python  file transcribe.py
-
-and past this code :
-
-import sys
-import deepspeech
-import numpy as np
-import wave
-
-def transcribe_audio(model_path, scorer_path, audio_path):
-    model = deepspeech.Model(model_path)
-    model.enableExternalScorer(scorer_path)
-
-    with wave.open(audio_path, 'rb') as wf:
-        if wf.getsampwidth() != 2:
-            raise ValueError("Only 16-bit audio files are supported")
-        if wf.getframerate() != 16000:
-            raise ValueError("Only 16kHz audio files are supported")
-
-        frames = wf.readframes(wf.getnframes())
-        audio = np.frombuffer(frames, dtype=np.int16)
-
-    text = model.stt(audio)
-    return text
-
-if __name__ == "__main__":
-    model_path = sys.argv[1]
-    scorer_path = sys.argv[2]
-    audio_path = sys.argv[3]
-
-    transcription = transcribe_audio(model_path, scorer_path, audio_path)
-    print(transcription)
-
-
-
-
-
-*/
-
-
-const upload2 = multer({ storage: multer.memoryStorage() });
-app.post('/api/speech-to-text', upload2.single('audio'), (req, res) => {
-    if (!req.file) {
-        console.error('No audio file uploaded.');
-        return res.status(400).send('No audio file uploaded.');
-    }
-
-    const tempFilePath = path.join(__dirname, 'temp.wav');
-    fs.writeFileSync(tempFilePath, req.file.buffer);
-
-    const modelPath = 'path/to/deepspeech-model.pbmm';
-    const scorerPath = 'path/to/deepspeech-scorer.scorer';
-
-    // Call the Python script
-    execFile('python', ['transcribe.py', modelPath, scorerPath, tempFilePath], (error, stdout, stderr) => {
-        fs.unlinkSync(tempFilePath); // Clean up the temp file
-
-        if (error) {
-            console.error('Error processing audio:', error);
-            return res.status(500).send('Error processing audio');
-        }
-        if (stderr) {
-            console.error('stderr:', stderr);
-            return res.status(500).send('Error processing audio');
-        }
-
-        const transcription = stdout.trim();
-        res.json({ text: transcription });
-    });
-});
 
 //npm install shortid
 // to upgrade ... 
@@ -536,7 +463,7 @@ app.post('/api/shorten-url', (req, res) => {
     }
 
     const shortId = shortid.generate();
-    const shortUrl = `${req.protocol}://${req.get('host')}/${shortId}`;
+    const shortUrl = `${req.protocol}://${req.get('host')}/shorten-url/${shortId}`;
 
     let normalizedUrl;
     try {
@@ -557,7 +484,7 @@ app.post('/api/shorten-url', (req, res) => {
     });
 });
 
-app.get('/:shortId', (req, res) => {
+app.get('/shorten-url/:shortId', (req, res) => {
     const { shortId } = req.params;
 
     const selectQuery = 'SELECT long_url FROM urls WHERE id = ?';
@@ -949,8 +876,42 @@ app.post('/api/convert-currency', async (req, res) => {
 });
 
 
+//CV dowloand
+//npm install playwright
+//npx playwright install
+const playwright = require('playwright');
 
+app.post('/api/html-to-pdf', async (req, res) => {
+    const { html, width, height } = req.body;
+    if (!html) {
+        return res.status(400).send('No HTML content provided.');
+    }
 
+    const outputPath = path.join(__dirname, 'output.pdf');
+
+    try {
+        const browser = await playwright.chromium.launch();
+        const page = await browser.newPage();
+
+        await page.setContent(html);
+        await page.setViewportSize({ width: width || 800, height: height || 600 });
+        await page.pdf({ path: outputPath, format: 'A4' });
+
+        await browser.close();
+
+        res.sendFile(outputPath, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                return res.status(500).send('An error occurred while sending the file.');
+            }
+
+            fs.unlinkSync(outputPath);
+        });
+    } catch (error) {
+        console.error('Conversion error:', error);
+        res.status(500).send('An error occurred during conversion.');
+    }
+});
 
 
 // db.query('SELECT * FROM settings', async (err, results) => {
@@ -5840,6 +5801,32 @@ app.use(express.static(path.resolve(__dirname, 'client', 'build')));
 app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
 });
+
+
+
+//################################# to delete ###################
+
+app.post('/api/sendPost', async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        const response = await axios.post('https://www.storysaver.net/storyProcesst.php?c=1', null, {
+            params: {
+                text_username: username
+            },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        });
+
+        res.status(200).json({ data: response.data });
+    } catch (error) {
+        res.status(500).json({ error: 'Error sending POST request' });
+    }
+});
+
+///################################################################""
+
 
 
 
